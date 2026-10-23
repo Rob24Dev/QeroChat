@@ -15,7 +15,7 @@
 <h4>TODO:</h4>
 - Realtime communication with WebSockets <br>
 - Caching <br>
-- Add unread count
+- Add unread count <br>
 - Some unique features<br>
 
 <h3 align="center">Written by Rob24Dev with ❤️</h3>
