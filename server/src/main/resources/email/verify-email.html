@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark light">
+    <title>Ověření e-mailu – QeroChat</title>
+</head>
+<body style="margin:0;padding:0;background:#0b0808;">
+<div style="display:none;max-height:0;overflow:hidden;">
+    Potvrď svou novou e-mailovou adresu pro QeroChat. Odkaz je jednorázový.
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0808">
+    <tr>
+        <td align="center" style="padding:32px 16px;">
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+                <tr>
+                    <td align="center" style="padding:0 0 24px;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td bgcolor="#e5484d" style="border-radius:14px;padding:10px 14px;font-size:22px;line-height:1;">💬</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td bgcolor="#140f0f" style="border:1px solid #3d2626;border-radius:20px;padding:40px 32px;">
+                        <h1 style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:bold;color:#f2e8e8;text-align:center;">
+                            Ověření nové e-mailové adresy
+                        </h1>
+                        <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#b39494;text-align:center;">
+                            Ahoj {{name}},
+                        </p>
+                        <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#b39494;text-align:center;">
+                            Někdo (pevně doufáme, že ty 🙂) požádal o změnu e-mailu u tvého QeroChat účtu.
+                            Klikni na tlačítko níže a potvrdíme, že tato adresa patří tobě, v souladu s našimi <a href="https://qerochat.com/conditions" target="_blank" style="color:#e5484d;text-decoration:underline;">podmínkami a ochranou údajů (GDPR)</a>.
+                        </p>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center">
+                                    <a href="{{confirmUrl}}" target="_blank"
+                                       style="display:inline-block;background:#e5484d;color:#ffffff;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:bold;padding:14px 36px;border-radius:12px;">
+                                        Ověřit e-mail
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#b39494;text-align:center;">
+                            Pokud tlačítko zazlobilo, zkopíruj tenhle odkaz do prohlížeče:<br>
+                            <a href="{{confirmUrl}}" style="color:#e5484d;word-break:break-all;">{{confirmUrl}}</a>
+                        </p>
+
+                        <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #3d2626;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#b39494;text-align:center;">
+                            ⏳ Odkaz platí <strong style="color:#f2e8e8;">{{expiry}} minut</strong> a je jednorázový.<br>
+                            Pokud jsi o změnu e-mailu nežádal(a), tenhle e-mail v klidu ignoruj – tvoje původní údaje zůstanou bezpečné a odkaz brzy expirovat.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding:24px 16px 0;">
+                        <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.6;color:#6b5b5b;">
+                            QeroChat · Automaticky generovaná zpráva, prosím neodpovídej na ni.<br>
+                            © 2026 QeroChat
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
