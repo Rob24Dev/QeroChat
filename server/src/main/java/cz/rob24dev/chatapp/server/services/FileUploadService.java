@@ -90,7 +90,7 @@ public class FileUploadService {
                     && originalImage.getWidth() >= 600 && originalImage.getHeight() >= 150)
                     && ((aspectRatio >= 3 && aspectRatio <= 10) || aspectRatio == (float) 16 / 9);
         } else if (fileType == FileType.CHAT_ICON || fileType == FileType.PROFILE_PICTURE) {
-            return (originalImage.getWidth() <= 256 && originalImage.getHeight() <= 256
+            return (originalImage.getWidth() <= 512 && originalImage.getHeight() <= 512
                     && originalImage.getWidth() >= 64 && originalImage.getHeight() >= 64)
                     && aspectRatio == 1;
         }

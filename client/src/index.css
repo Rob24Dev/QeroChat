@@ -15,18 +15,15 @@
     --bubble-in: #e8e2e2; --bubble-out: #d63939; --bubble-out-text: #fff;
 }
 
-/* ---------- scrollbars – tenké, sladěné s themem (MIMO media query) ---------- */
+/* ---------- SCROLLBARS ---------- */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
+    box-sizing: border-box;
 }
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { margin: 0; padding: 0; }
 html, body { height: 100%; }
+
 body {
     background: radial-gradient(1200px 600px at 70% -10%, #241212 0%, var(--bg) 55%);
     color: var(--text);
@@ -37,9 +34,11 @@ body {
 [data-theme="light"] body {
     background: radial-gradient(1200px 600px at 70% -10%, #f8f0f0 0%, var(--bg) 55%);
 }
+
 #root { height: 100%; }
 .hidden { display: none !important; }
 button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
 input, select {
     font: inherit; color: var(--text); background: var(--panel2);
     border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%;
@@ -47,8 +46,10 @@ input, select {
 }
 input:focus, select:focus { border-color: var(--accent); }
 input:disabled { opacity: .5; cursor: not-allowed; }
+
 label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
 label > input, label > select { margin-top: 5px; }
+
 .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     background: var(--panel2); border: 1px solid var(--line); border-radius: 10px;
@@ -59,6 +60,7 @@ label > input, label > select { margin-top: 5px; }
 .btn.accent:hover { filter: brightness(1.1); }
 .btn.danger { color: var(--danger); border-color: rgba(255,99,105,.4); }
 .btn.small { padding: 6px 12px; font-size: 13px; }
+
 .btn-gradient {
     width: 100%; margin-top: 6px; padding: 12px; border: none; border-radius: 12px;
     color: #fff; font-weight: 700; font-size: 15px; cursor: pointer;
@@ -69,6 +71,12 @@ label > input, label > select { margin-top: 5px; }
 
 .screen { position: fixed; inset: 0; display: none; }
 .screen.active { display: flex; flex-direction: column; }
+
+/* ---------- WEBKIT SCROLLBARS ---------- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* ---------- AUTH ---------- */
 #screen-auth { align-items: center; justify-content: center; }
@@ -202,8 +210,6 @@ label > input, label > select { margin-top: 5px; }
 .msg.in .bubble { background: var(--bubble-in); border-bottom-left-radius: 4px; }
 .msg.out .bubble { background: var(--bubble-out); color: var(--bubble-out-text); border-bottom-right-radius: 4px; }
 .chat-empty { margin: auto; color: var(--muted); text-align: center; }
-.av-msg { width: 40px; height: 40px; flex-shrink: 0; }
-.av-msg .ini { font-size: 15px; }
 
 .day-sep { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; color: var(--muted); font-size: 12px; }
 .day-sep::before, .day-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
@@ -271,7 +277,7 @@ label > input, label > select { margin-top: 5px; }
     background: var(--panel2); color: var(--muted); font-size: 14px; text-align: center;
 }
 
-/* ---------- profil panel ---------- */
+/* ---------- PROFIL PANEL ---------- */
 .profile-panel {
     width: 290px; flex: 0 0 auto; border-left: 1px solid var(--line);
     background: var(--panel); overflow-y: auto;
@@ -283,80 +289,45 @@ label > input, label > select { margin-top: 5px; }
 [data-theme="light"] .pp-banner { background-color: #e8d8d8; }
 .pp-body { padding: 0 16px 18px; }
 .pp-avatar { position: relative; width: 80px; height: 80px; margin-top: -40px; }
-.pp-avatar .avatar { width: 80px; height: 80px; border: 4px solid var(--panel); }
+.pp-avatar .avatar { width: 80px; height: 80px; border: 4px solid var(--panel); border-radius: 50%; }
 .pp-dot { position: absolute; bottom: 2px; right: 2px; width: 16px; height: 16px; border: 4px solid var(--panel); border-radius: 50%; }
 .pp-body h3 { margin-top: 10px; font-size: 18px; }
 
-/* ---------- BADGES – pill s ohraničením + tooltip při hoveru ---------- */
+/* ---------- BADGES ---------- */
 .pp-badges { display: flex; align-items: center; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
-
 .pp-badge-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    height: 28px;
-    padding: 0 8px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--panel2);
-    cursor: default;
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--line);
+    border-radius: 8px; background: var(--panel2); cursor: default;
     transition: border-color .15s, background .15s;
 }
+.pp-badge-wrap:hover { border-color: var(--accent); background: rgba(229, 72, 77, 0.08); }
+[data-theme="light"] .pp-badge-wrap:hover { background: rgba(214, 57, 57, 0.06); }
 
-.pp-badge-wrap:hover {
-    border-color: var(--accent);
-    background: rgba(229, 72, 77, 0.08);
-}
-
-[data-theme="light"] .pp-badge-wrap:hover {
-    background: rgba(214, 57, 57, 0.06);
-}
-
-/* tooltip s názvem badge */
 .pp-badge-wrap::after {
-    content: attr(data-title);
-    position: absolute;
-    left: 0;
-    top: calc(100% + 6px);
-    background: #000c;
-    border: 1px solid var(--line);
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: .15s;
-    z-index: 45;
+    content: attr(data-title); position: absolute; left: 0; top: calc(100% + 6px);
+    background: #000c; border: 1px solid var(--line); padding: 4px 10px;
+    border-radius: 8px; font-size: 12px; white-space: nowrap; opacity: 0;
+    pointer-events: none; transition: .15s; z-index: 45;
 }
-
 .pp-badge-wrap:hover::after { opacity: 1; }
-
 [data-theme="light"] .pp-badge-wrap::after { background: #fffc; }
 
 .pp-badge { font-size: 14px; line-height: 1; }
-
-.pp-badge-img {
-    width: 18px;
-    height: 18px;
-    border-radius: 6px;
-    object-fit: cover;
-}
+.pp-badge-img { width: 18px; height: 18px; border-radius: 6px; object-fit: cover; }
 
 .pp-line { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); margin-top: 6px; }
 .pp-section { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 2px; }
 .pp-section b { font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); }
 .pp-section span { font-size: 13px; }
 .pp-empty { color: var(--muted); text-align: center; margin-top: 30px; }
-.av-pp .ini { font-size: 28px; }
+
 .banner-preview {
     height: 70px; border-radius: 10px; background-size: cover; background-position: center;
     margin-top: 10px; border: 1px solid var(--line);
 }
 
-/* ---------- contacts bar ---------- */
+/* ---------- CONTACTS BAR ---------- */
 .contacts-wrap {
     border-top: 1px solid var(--line); padding: 14px clamp(14px, 4vw, 40px) 12px;
     background: linear-gradient(#150e0e, #0b0808);
@@ -368,16 +339,16 @@ label > input, label > select { margin-top: 5px; }
     border-radius: 24px; scrollbar-width: none;
 }
 .contacts-bar::-webkit-scrollbar { display: none; }
-/* vycentrování kontaktů – pseudo-elementy absorbují volné místo */
-.contacts-bar::before,
-.contacts-bar::after { content: ""; flex: 1; }
+.contacts-bar::before, .contacts-bar::after { content: ""; flex: 1; }
 .contacts-empty { color: var(--muted); font-size: 13px; padding: 6px 4px; }
+
 .contact { position: relative; width: 62px; height: 62px; flex: 0 0 auto; border-radius: 50%; transition: transform .15s; }
 .contact:hover { transform: translateY(-3px); }
 .contact .avatar { width: 62px; height: 62px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 14px rgba(255,110,110,.35); }
 [data-theme="light"] .contact .avatar { border-color: #f5f0f0; box-shadow: 0 0 14px rgba(214,57,57,.25); }
 .contact:hover .avatar { box-shadow: 0 0 22px var(--accent-glow); }
 .contact.selected .avatar { border-color: var(--accent); box-shadow: 0 0 26px var(--accent-glow); }
+
 .badge {
     position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px;
     background: var(--danger); border-radius: 10px; font-size: 11px; font-weight: 700;
@@ -385,6 +356,7 @@ label > input, label > select { margin-top: 5px; }
 }
 .status-pip { position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #0b0808; }
 [data-theme="light"] .status-pip { border-color: #ebe5e5; }
+
 .typing-pip {
     position: absolute; bottom: -3px; right: -3px; display: flex; gap: 2px; align-items: center;
     background: var(--accent); border: 2px solid var(--bg); border-radius: 10px; padding: 4px 5px;
@@ -392,6 +364,7 @@ label > input, label > select { margin-top: 5px; }
 .typing-pip i { width: 3px; height: 3px; border-radius: 50%; background: #fff; animation: tb 1s infinite; }
 .typing-pip i:nth-child(2) { animation-delay: .2s; }
 .typing-pip i:nth-child(3) { animation-delay: .4s; }
+
 .scroll-line {
     position: relative; width: min(420px, 70%); height: 4px; border-radius: 2px;
     background: var(--line); margin: 12px auto 2px; overflow: hidden;
@@ -400,8 +373,6 @@ label > input, label > select { margin-top: 5px; }
     position: absolute; top: 0; height: 100%; border-radius: 2px;
     background: var(--accent); box-shadow: 0 0 10px var(--accent-glow);
 }
-
-/* fixed tooltip se jménem kontaktu – mimo scroll container */
 .orbit-tip {
     position: fixed; transform: translate(-50%, -100%);
     background: #000c; border: 1px solid var(--line);
@@ -410,20 +381,33 @@ label > input, label > select { margin-top: 5px; }
 }
 [data-theme="light"] .orbit-tip { background: #fffc; }
 
+/* ---------- AVATARS (Sjednocené a opravené rozměry) ---------- */
 .avatar {
     position: relative; border-radius: 50%; overflow: hidden;
     background: linear-gradient(135deg, #3a2b2b, #241a1a);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 [data-theme="light"] .avatar { background: linear-gradient(135deg, #e8e0e0, #d8d0d0); }
-.avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .avatar .ini { font-weight: 700; color: var(--accent); }
-.av-sm .ini { font-size: 20px; }
-.av-lg { width: 86px; height: 86px; }
-.av-lg .ini { font-size: 30px; }
+
+/* Velikostní modifikátory avatarů */
+.av-sm { width: 32px; height: 32px; }
+.av-sm .ini { font-size: 14px; }
+
 .av-head { width: 40px; height: 40px; }
 .av-head .ini { font-size: 15px; }
 
+.av-msg { width: 40px; height: 40px; }
+.av-msg .ini { font-size: 15px; }
+
+.av-lg { width: 86px; height: 86px; }
+.av-lg .avatar { width: 86px; height: 86px; }
+.av-lg .ini { font-size: 30px; }
+
+.av-pp .ini { font-size: 28px; }
+
+/* ---------- CONTEXT MENU ---------- */
 #ctx-menu {
     position: fixed; z-index: 50; min-width: 190px; background: var(--panel);
     border: 1px solid var(--line); border-radius: 12px; padding: 6px;
@@ -457,6 +441,7 @@ label > input, label > select { margin-top: 5px; }
 .req-item .who span { font-size: 12px; color: var(--muted); }
 .req-empty { color: var(--muted); font-size: 13px; padding: 6px 2px; }
 
+/* ---------- TOAST & MODAL ---------- */
 #toast {
     position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
     background: var(--panel); border: 1px solid var(--accent); color: var(--text);
@@ -471,18 +456,15 @@ label > input, label > select { margin-top: 5px; }
 .modal h3 { margin-bottom: 14px; color: var(--accent); }
 .modal-info { font-size: 13px; color: var(--muted); margin-bottom: 12px; padding: 10px; background: var(--panel2); border-radius: 8px; }
 .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+
 .char-count {
-    align-self: center;
-    min-width: 74px;
-    text-align: right;
-    font-size: 12px;
-    color: var(--muted);
-    flex-shrink: 0;
+    align-self: center; min-width: 74px; text-align: right;
+    font-size: 12px; color: var(--muted); flex-shrink: 0;
 }
 .char-count.over { color: var(--danger); font-weight: 700; }
 input.inp-over, input.inp-over:focus { border-color: var(--danger); }
 
-/* ---------- responzivní breakpointy ---------- */
+/* ---------- RESPONSIVE BREAKPOINTS ---------- */
 @media (max-width: 1100px) { .profile-panel { display: none; } }
 @media (max-width: 820px) { .chats-sidebar { display: none; } }
 @media (max-width: 640px) { .contact, .contact .avatar { width: 54px; height: 54px; } }

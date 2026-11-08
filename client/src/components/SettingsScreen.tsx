@@ -1,4 +1,7 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent, useRef } from 'react';
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
+
 import type { Contact, FriendRequest, Requests, Status, Theme, User } from '../types';
 import { api, uploadFile } from '../api';
 import { STATUS_CS, toast } from '../utils';
@@ -21,6 +24,15 @@ interface Props {
   onThemeChange: (t: Theme) => void;
 }
 
+// Pomocná funkce pro vycentrování počátečního ořezu 1:1
+function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
+  return centerCrop(
+      makeAspectCrop({ unit: '%', width: 90 }, aspect, mediaWidth, mediaHeight),
+      mediaWidth,
+      mediaHeight
+  );
+}
+
 export default function SettingsScreen(p: Props) {
   const [name, setName] = useState(p.user.name);
   const [status, setStatus] = useState<Status>(p.user.status);
@@ -39,6 +51,11 @@ export default function SettingsScreen(p: Props) {
   const [addErr, setAddErr] = useState('');
   const blocked = p.contacts.filter(c => c.blocked);
   const [deleteErr, setDeleteErr] = useState('');
+
+  // --- STAVY PRO CROPPER ---
+  const [cropModalSrc, setCropModalSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   const handleDeleteAccount = () => {
     if (!window.confirm('Opravdu chceš trvale smazat svůj účet? Tato akce je nevratná.')) {
@@ -59,9 +76,9 @@ export default function SettingsScreen(p: Props) {
     setProfileErr('');
     if (!name.trim()) { setProfileErr('Jméno je povinné.'); return; }
     p.onSave({
-      name: name.trim(),
+      name: (name ?? '').trim(),
       status,
-      statusText: statusText.trim(),
+      statusText: (statusText ?? '').trim(),
       avatar: p.user.avatar,
       banner: p.user.banner,
     }).catch((err: unknown) => {
@@ -94,12 +111,24 @@ export default function SettingsScreen(p: Props) {
         })
         .catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : 'Změna e-mailu selhala.';
-          console.error('Change email error:', err);
           setEmailErr(msg);
         });
   };
 
   const handleUpload = (file: File, fileType: 'PROFILE_PICTURE' | 'BANNER') => {
+    if (fileType === 'PROFILE_PICTURE') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setCropModalSrc(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    executeUpload(file, fileType);
+  };
+
+  const executeUpload = (file: File, fileType: 'PROFILE_PICTURE' | 'BANNER') => {
     void uploadFile(file, fileType)
         .then(url => {
           void p.onSave({
@@ -110,8 +139,57 @@ export default function SettingsScreen(p: Props) {
             banner: fileType === 'BANNER' ? url : p.user.banner,
           });
           toast('Obrázek nahrán a uložen ✔');
+          setCropModalSrc(null);
         })
         .catch((err: unknown) => toast(err instanceof Error ? err.message : 'Nahrání selhalo 🚫'));
+  };
+
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    setCrop(centerAspectCrop(width, height, 1)); // Vynutit poměr 1:1
+  };
+
+  const handleCropConfirm = () => {
+    const image = imgRef.current;
+    if (!image || !crop) return;
+
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+
+    const targetSize = 400; // Výsledné rozlišení na backendu (400x400 px = čistý 1:1 poměr)
+    canvas.width = targetSize;
+    canvas.height = targetSize;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const pixelRatio = window.devicePixelRatio || 1;
+    canvas.width = targetSize * pixelRatio;
+    canvas.height = targetSize * pixelRatio;
+    ctx.scale(pixelRatio, pixelRatio);
+
+    const cropX = crop.x * scaleX;
+    const cropY = crop.y * scaleY;
+    const cropW = crop.width * scaleX;
+    const cropH = crop.height * scaleY;
+
+    ctx.drawImage(
+        image,
+        cropX,
+        cropY,
+        cropW,
+        cropH,
+        0,
+        0,
+        targetSize,
+        targetSize
+    );
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const croppedFile = new File([blob], 'avatar-cropped.jpg', { type: 'image/jpeg' });
+      executeUpload(croppedFile, 'PROFILE_PICTURE');
+    }, 'image/jpeg', 0.9);
   };
 
   const submitAdd = (e: FormEvent) => {
@@ -187,6 +265,7 @@ export default function SettingsScreen(p: Props) {
             <div className="form-err">{profileErr}</div>
           </section>
 
+          {/* Ostatní sekce */}
           <section className="card">
             <h3>Změna hesla</h3>
             <label>Aktuální heslo<input type="password" value={oldP} onChange={e => setOldP(e.target.value)} /></label>
@@ -274,6 +353,42 @@ export default function SettingsScreen(p: Props) {
             </button>
           </section>
         </div>
+
+        {/* --- 1:1 CROPPER MODAL (REACT-IMAGE-CROP) --- */}
+        {cropModalSrc && (
+            <div className="modal-backdrop" style={{
+              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+              background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+            }}>
+              <div className="card" style={{ width: 'max-content', maxWidth: '90vw', textAlign: 'center', background: 'var(--bg-card, #222)', padding: '20px', borderRadius: '12px' }}>
+                <h3>Upravit profilovou fotku (1:1)</h3>
+                <p style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '15px' }}>
+                  Označ myší oblast, kterou chceš vyříznout.
+                </p>
+
+                <div style={{ maxHeight: '60vh', overflow: 'auto', marginBottom: '15px' }}>
+                  <ReactCrop
+                      crop={crop}
+                      onChange={(c) => setCrop(c)}
+                      aspect={1}
+                  >
+                    <img
+                        ref={imgRef}
+                        src={cropModalSrc}
+                        alt="Crop preview"
+                        onLoad={onImageLoad}
+                        style={{ maxHeight: '50vh', display: 'block' }}
+                    />
+                  </ReactCrop>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <button className="btn" onClick={() => setCropModalSrc(null)}>Zrušit</button>
+                  <button className="btn accent" onClick={handleCropConfirm}>Uložit profilovku</button>
+                </div>
+              </div>
+            </div>
+        )}
       </div>
   );
 }
