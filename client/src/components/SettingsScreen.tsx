@@ -103,9 +103,9 @@ export default function SettingsScreen(p: Props) {
     void uploadFile(file, fileType)
         .then(url => {
           void p.onSave({
-            name: name.trim(),
+            name: (name ?? '').trim(),
             status,
-            statusText: statusText.trim(),
+            statusText: (statusText ?? '').trim(),
             avatar: fileType === 'PROFILE_PICTURE' ? url : p.user.avatar,
             banner: fileType === 'BANNER' ? url : p.user.banner,
           });

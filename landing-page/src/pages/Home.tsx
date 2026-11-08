@@ -11,7 +11,7 @@ export default function Home() {
     const [message, setMessage] = useState({ type: '' as 'ok' | 'err' | '', text: '' });
 
     useEffect(() => {
-        const TARGET_DATE = new Date('2026-10-10T16:00:00');
+        const TARGET_DATE = new Date('2026-12-12T16:00:00');
         const timer = setInterval(() => {
             const diff = TARGET_DATE.getTime() - new Date().getTime();
             if (diff <= 0) {

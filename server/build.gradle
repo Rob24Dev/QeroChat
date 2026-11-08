@@ -6,7 +6,7 @@ plugins {
 
 group = 'cz.rob24dev.chatapp'
 version = '0.9.6-BETA'
-description = 'ChatAppServer'
+description = 'QeroServer'
 
 java {
     toolchain {
