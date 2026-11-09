@@ -73,9 +73,8 @@ public class ChatService {
     @Transactional
     public void editChat(@Valid EditChatRequest editChatRequest, UUID chatId, UUID requestorId) {
         User requestor = userService.getUserById(requestorId);
-        Chat chat = chatsRepository.findChatByActorsContainsAndId(requestor, chatId).orElse(null);
+        Chat chat = getChatByActorsContainsAndId(requestor, chatId);
         Contact contact = contactService.getContactByHolderAndContactChatsContains(requestor, chat);
-        if(chat == null) throw new ResourceNotFoundException("Chat nebyl nalezen.");
         if(chat.isGlobal()) throw new BadRequestException("Global chat nejde upravit.");
         if(!chat.getId().equals(chatId)) throw new UnauthorizedToOperateException("Nemáš povolení upravovat tento chat.");
         if(contact.isBlockedMe() || contact.isBlocked() || contact.isRemovedMe() || contact.isRemoved()) throw new BadRequestException("S tímto kontaktem nemůžeš upravovat chaty.");
@@ -87,9 +86,8 @@ public class ChatService {
     @Transactional
     public void deleteChat(UUID chatId, UUID requestorId) {
         User requestor = userService.getUserById(requestorId);
-        Optional<Chat> optionalChat = getChatByActorsContainsAndId(requestor, chatId);
-        if(optionalChat.isEmpty() || !optionalChat.get().getId().equals(chatId)) throw new UnauthorizedToOperateException("Nemáš povolení mazat tento chat.");
-        Chat chat = optionalChat.get();
+        Chat chat = getChatByActorsContainsAndId(requestor, chatId);
+        if(!getChatsActorsIds(chat).contains(requestorId)) throw new UnauthorizedToOperateException("Nemáš povolení mazat tento chat.");
         if(chat.isGlobal()) throw new BadRequestException("Global chat nejde odstranit.");
         Contact contact = contactService.getContactByHolderAndContactChatsContains(requestor, chat);
         if(contact.isBlockedMe() || contact.isBlocked() || contact.isRemovedMe() || contact.isRemoved()) throw new BadRequestException("S tímto kontaktem nemůžeš mazat chaty.");
@@ -109,15 +107,22 @@ public class ChatService {
 
 
 
-    public Optional<Chat> getChatByActorsContainsAndId(User requestor, UUID chatId) {
-        return chatsRepository.findChatByActorsContainsAndId(requestor, chatId);
+    public Chat getChatByActorsContainsAndId(User requestor, UUID chatId) {
+        Optional<Chat> optionalChat = chatsRepository.findChatByActorsContainsAndId(requestor, chatId);
+        if(optionalChat.isEmpty()) throw new ResourceNotFoundException("Chat nenalezen.");
+        return optionalChat.get();
+    }
+
+    public List<UUID> getChatsActorsIds(Chat chat) {
+        List<UUID> chatsActorsIds = new ArrayList<>();
+        chat.getActors().forEach(actor -> chatsActorsIds.add(actor.getId()));
+        return chatsActorsIds;
     }
 
     @Transactional
     public List<MessageDto> getMessages(User requestor, UUID chatId, int limit, LocalDateTime before) {
-        Optional<Chat> optionalChat = getChatByActorsContainsAndId(requestor, chatId);
-        if(optionalChat.isEmpty() || optionalChat.get().getActors().contains(requestor)) throw new UnauthorizedToOperateException("Nemáš oprávnění nahlížet na tento chat.");
-        Chat chat = optionalChat.get();
+        Chat chat = getChatByActorsContainsAndId(requestor, chatId);
+        if(!getChatsActorsIds(chat).contains(requestor.getId())) throw new UnauthorizedToOperateException("Nemáš oprávnění nahlížet na tento chat.");
         List<Message> messages;
         Pageable messagesPageable = PageRequest.of(0, limit);
         if(before == null) messages = messagesService.getMessagesByChat(chat, messagesPageable);
@@ -130,9 +135,9 @@ public class ChatService {
 
     @Transactional
     public MessageDto sendMessage(UUID chatId, User author, @NotBlank String text) {
-        Optional<Chat> optionalChat = getChatByActorsContainsAndId(author, chatId);
-        if(optionalChat.isEmpty() || optionalChat.get().getActors().contains(author)) throw new UnauthorizedToOperateException("Nemáš oprávnění posílat zprávy do tohohle chatu.");
-        Chat chat = optionalChat.get();
+        Chat chat = getChatByActorsContainsAndId(author, chatId);
+        if(!getChatsActorsIds(chat).contains(author.getId()))  throw new UnauthorizedToOperateException("Nemáš oprávnění posílat zprávy do tohohle chatu.");
+
         Contact contact = contactService.getContactByHolderAndContactChatsContains(author, chat);
         if(contact.isBlockedMe() || contact.isBlocked() || contact.isRemovedMe() || contact.isRemoved()) throw new BadRequestException("Tomuhle uživateli nemůžeš poslat zprávu.");
         Message message = new Message();
@@ -155,8 +160,8 @@ public class ChatService {
     @Transactional
     public MessageDto editMessage(UUID messageChatId, User requestor, Message message, SendOrEditMessageRequest sendOrEditMessageRequest) {
         Contact contact = contactService.getContactByHolderAndContactChatsContains(message.getAuthor(), message.getChat());
-        Optional<Chat> optionalChat = getChatByActorsContainsAndId(requestor, messageChatId);
-        if(optionalChat.isEmpty() || optionalChat.get().getId().equals(messageChatId)) throw new UnauthorizedToOperateException("Nemáš povolení upravovat zprávy v tomto chatu.");
+        Chat chat = getChatByActorsContainsAndId(requestor, messageChatId);
+        if(!getChatsActorsIds(chat).contains(requestor.getId())) throw new UnauthorizedToOperateException("Nemáš povolení upravovat zprávy v tomto chatu.");
         if(!message.getAuthor().getId().equals(requestor.getId())) throw new UnauthorizedToOperateException("Nemůžeš upravovat zprávu, která není tvoje.");
         if(contact.isBlockedMe() || contact.isBlocked() || contact.isRemovedMe() || contact.isRemoved()) throw new BadRequestException("V tomto chatu nemůžeš upravovat zprávu.");
         if(message.getText().equals(sendOrEditMessageRequest.getText())) throw new BadRequestException("Zprávu si neupravil.");
@@ -168,8 +173,8 @@ public class ChatService {
 
     @Transactional
     public void deleteMessage(UUID messageChatId, User requestor, Message message) {
-        Optional<Chat> optionalChat = getChatByActorsContainsAndId(requestor, messageChatId);
-        if(optionalChat.isEmpty() || optionalChat.get().getId().equals(messageChatId)) throw new UnauthorizedToOperateException("Nemáš povolení odstranovat zprávy v tomto chatu.");
+        Chat chat = getChatByActorsContainsAndId(requestor, messageChatId);
+        if(!getChatsActorsIds(chat).contains(requestor.getId())) throw new UnauthorizedToOperateException("Nemáš povolení odstranovat zprávy v tomto chatu.");
         if(!message.getAuthor().getId().equals(requestor.getId())) throw new UnauthorizedToOperateException("Nemůžeš smazat zprávu, která není tvoje.");
         Contact contact = contactService.getContactByHolderAndContactChatsContains(message.getAuthor(), message.getChat());
         if(contact.isBlockedMe() || contact.isBlocked() || contact.isRemovedMe() || contact.isRemoved()) throw new BadRequestException("V tomto chatu nemůžeš smazat zprávu.");

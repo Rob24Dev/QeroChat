@@ -107,7 +107,7 @@ public class FileUploadService {
             if (objectUrlIfExist != null) return objectUrlIfExist;
             minioClient().putObject(
                     PutObjectArgs.builder()
-                            .bucket("chatapp-uploads")
+                            .bucket("qero-uploads")
                             .object(fileName)
                             .stream(fileInputStream, file.length(), -1L)
                             .contentType("image/jpg")
@@ -122,7 +122,7 @@ public class FileUploadService {
                             "fileName:", fileName
                     )
             );
-            return minioUrl + "/chatapp-uploads/" + fileName;
+            return minioUrl + "/qero-uploads/" + fileName;
         } catch (IOException | MinioException e) {
             log.error("Failed to upload file: {}", e.getMessage());
         }
@@ -134,9 +134,9 @@ public class FileUploadService {
             StatObjectResponse statObject =
                     minioClient().statObject(
                             StatObjectArgs.builder()
-                                    .bucket("chatapp-uploads")
+                                    .bucket("qero-uploads")
                                     .object(fileName).build());
-            return minioUrl + "/chatapp-uploads/" + statObject.object();
+            return minioUrl + "/qero-uploads/" + statObject.object();
         } catch (MinioException ex) {
             return null;
         }
