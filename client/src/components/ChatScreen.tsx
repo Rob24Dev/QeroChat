@@ -70,11 +70,18 @@ export default function ChatScreen(p: Props) {
     return !!c && !c.blocked && !c.removed;
   });
 
-  const all = chat ? (p.conversations[chat.id] ?? []) : [];
+  // Bezpečné získání pole zpráv (ošetření proti objektu i undefined)
+  const rawConv = chat ? p.conversations[chat.id] : null;
+  const all: Message[] = Array.isArray(rawConv)
+      ? rawConv
+      : (rawConv && typeof rawConv === 'object' && 'messages' in rawConv && Array.isArray((rawConv as any).messages))
+          ? (rawConv as any).messages
+          : [];
+
   const canLoadMore = all.length > 0 && hasMoreServer && !loadingOlder;
+  const showLoadMoreButton = canLoadMore && all.length >= 10;
 
   useEffect(() => { setChatLimit(20); }, [p.selectedContact]);
-  /* při přepnutí chatu resetuj – nový chat může mít další starší zprávy */
   useEffect(() => { setHasMoreServer(true); }, [p.activeChat]);
 
   useEffect(() => {
@@ -86,13 +93,11 @@ export default function ChatScreen(p: Props) {
     return () => document.removeEventListener('mousedown', close);
   }, [emojiOpen]);
 
-  /* po otevření chatu / nové zprávě skoč dolů (jen když se zrovna nescrolluje historie) */
   useEffect(() => {
     const el = boxRef.current;
     if (el && prevHRef.current == null) el.scrollTop = el.scrollHeight;
   }, [p.conversations, p.activeChat, p.typing, editing]);
 
-  /* po prependnutí starších zpráv zachovej pozici scrollu */
   useLayoutEffect(() => {
     const el = boxRef.current;
     if (el && prevHRef.current != null) {
@@ -264,8 +269,8 @@ export default function ChatScreen(p: Props) {
               const c = p.contacts.find(x => x.id === ch.contactId);
               if (!c) return null;
               const arr = p.conversations[ch.id] ?? [];
-              const last = arr[arr.length - 1];
-              const isTyping = !!p.typing[ch.id];
+              const last = Array.isArray(arr) ? arr[arr.length - 1] : undefined;
+              const isTyping = p.typing[ch.id];
               return (
                   <button key={ch.id} className={'chat-item' + (ch.id === p.activeChat ? ' active' : '')} onClick={() => p.onOpenChat(ch.id)}>
                     {renderChatIcon(ch, c)}
@@ -288,9 +293,13 @@ export default function ChatScreen(p: Props) {
             <main className="messages" ref={boxRef} onScroll={onMessagesScroll}>
               {chat ? (
                   <>
-                    {canLoadMore && (all.length % 20 === 0) && (
-                        <button className="load-more" onClick={() => void loadMore()}>↑ Načíst starší zprávy (20 předchozích)</button>
-                    )}
+                    {}
+                    {showLoadMoreButton ? (
+                        <button className="load-more" onClick={() => void loadMore()}>↑ Načíst starší zprávy</button>
+                    ) : (!hasMoreServer && all.length > 0) ? (
+                        <div className="day-sep"><span>Žádné další zprávy</span></div>
+                    ) : null}
+
                     {loadingOlder && <div className="day-sep"><span>Načítám starší…</span></div>}
                     {all.map((m, i) => {
                       const prev = all[i - 1];

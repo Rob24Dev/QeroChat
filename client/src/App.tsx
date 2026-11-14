@@ -118,8 +118,9 @@ export default function App() {
   const resync = useCallback(async () => {
     if (!user) return;
     for (const ch of ref.current.chats) {
-      const fresh = await api.getMessages(ch.id, undefined, user.id);
-      setConversations(prev => ({ ...prev, [ch.id]: fresh }));
+      const res = await api.getMessages(ch.id, undefined, user.id);
+      const freshMsgs = Array.isArray(res) ? res : (res?.messages ?? []);
+      setConversations(prev => ({ ...prev, [ch.id]: freshMsgs }));
     }
   }, [user]);
 
@@ -145,7 +146,8 @@ export default function App() {
       const rq = await api.getFriendRequests();
       const conv: Record<string, Message[]> = {};
       for (const c of ch) {
-        conv[c.id] = await api.getMessages(c.id, undefined, myId);
+        const res = await api.getMessages(c.id, undefined, myId);
+        conv[c.id] = Array.isArray(res) ? res : (res?.messages ?? []);
       }
       setContacts(cs); setChats(ch); setRequests(rq); setConversations(conv);
       setActiveChat(null); setReqBadge(0);
@@ -259,12 +261,35 @@ export default function App() {
     if (!user) return false;
     const current = conversations[chatId] ?? [];
     if (current.length === 0) return false;
-    const older = await api.getMessages(chatId, current[0].createdAt, user.id);
+
+    const oldestMsg = current[0];
+    if (!oldestMsg || !oldestMsg.createdAt) return false;
+
+    // --- DEBUG: Podívej se, co posíláme na server ---
+    console.log('📤 [loadOlder] Odesílám požadavek:', {
+      chatId,
+      before: oldestMsg.createdAt,
+      currentMessagesCount: current.length
+    });
+
+    const res = await api.getMessages(chatId, oldestMsg.createdAt, user.id);
+
+    // --- DEBUG: Podívej se, co vrátil backend ---
+    console.log('📥 [loadOlder] Odpověď ze serveru:', res);
+
+    const older = res.messages ?? [];
+    const hasMoreServer = res.hasMore ?? false;
+
+    console.log(`📊 [loadOlder] Nalezeno starších zpráv: ${older.length}, hasMore: ${hasMoreServer}`);
+
     if (older.length === 0) return false;
 
     const known = new Set(current.map(m => m.id));
     const fresh = older.filter(m => !known.has(m.id));
-    if (fresh.length === 0) return false;
+
+    console.log(`✨ [loadOlder] Po filtraci duplicit zbývá nových zpráv k přidání: ${fresh.length}`);
+
+    if (fresh.length === 0) return hasMoreServer;
 
     setConversations(prev => {
       const prevKnown = new Set((prev[chatId] ?? []).map(m => m.id));
@@ -273,7 +298,7 @@ export default function App() {
       return { ...prev, [chatId]: [...toAdd, ...(prev[chatId] ?? [])] };
     });
 
-    return fresh.length === 20;
+    return hasMoreServer;
   };
 
   const updateChat = async (chatId: string, patch: Partial<Pick<Chat, 'name' | 'icon'>>) => {

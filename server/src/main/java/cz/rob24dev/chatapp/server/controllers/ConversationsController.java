@@ -17,6 +17,7 @@ import cz.rob24dev.chatapp.server.services.MessagesService;
 import cz.rob24dev.chatapp.server.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +43,8 @@ public class ConversationsController {
                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime before,
                                          @RequestAttribute("authenticatedUserId") UUID userId) {
         User user = userService.getUserById(userId);
-        return ResponseEntity.ok(chatService.getMessages(user, chatId, limit, before));
+        System.out.println(chatService.getMessages(user, chatId, limit, before));
+        return ResponseEntity.status(HttpStatus.OK).body(chatService.getMessages(user, chatId, limit, before));
     }
 
     @PostMapping("/{id}/messages")

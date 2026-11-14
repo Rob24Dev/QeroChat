@@ -14,6 +14,7 @@ import cz.rob24dev.chatapp.server.dto.MessageDto;
 import cz.rob24dev.chatapp.server.dto.requests.CreateChatRequest;
 import cz.rob24dev.chatapp.server.dto.requests.EditChatRequest;
 import cz.rob24dev.chatapp.server.dto.requests.SendOrEditMessageRequest;
+import cz.rob24dev.chatapp.server.dto.responses.GetMessagesResponse;
 import cz.rob24dev.chatapp.server.exceptions.BadRequestException;
 import cz.rob24dev.chatapp.server.exceptions.ResourceNotFoundException;
 import cz.rob24dev.chatapp.server.exceptions.UnauthorizedToOperateException;
@@ -120,17 +121,21 @@ public class ChatService {
     }
 
     @Transactional
-    public List<MessageDto> getMessages(User requestor, UUID chatId, int limit, LocalDateTime before) {
+    public GetMessagesResponse getMessages(User requestor, UUID chatId, int limit, LocalDateTime before) {
         Chat chat = getChatByActorsContainsAndId(requestor, chatId);
         if(!getChatsActorsIds(chat).contains(requestor.getId())) throw new UnauthorizedToOperateException("Nemáš oprávnění nahlížet na tento chat.");
         List<Message> messages;
+        limit++;
         Pageable messagesPageable = PageRequest.of(0, limit);
+        limit--;
         if(before == null) messages = messagesService.getMessagesByChat(chat, messagesPageable);
         else messages = messagesService.getMessagesByChatAndCreatedAtBefore(chat, before, messagesPageable);
+        boolean hasMore = messages.size() > limit;
+        if(hasMore) messages = messages.subList(0, limit);
+
         Collections.reverse(messages);
-        return messages.stream()
-                .map(MessageDto::from)
-                .toList();
+        List<MessageDto> messagesFinal = messages.stream().map(MessageDto::from).toList();
+        return new GetMessagesResponse(messagesFinal, hasMore);
     }
 
     @Transactional

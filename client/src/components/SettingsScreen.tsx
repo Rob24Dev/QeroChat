@@ -106,8 +106,8 @@ export default function SettingsScreen(p: Props) {
     if (!emailPass) { setEmailErr('Pro změnu e-mailu zadej aktuální heslo.'); return; }
     api.changeEmail(newEmail.trim(), emailPass)
         .then(() => {
-          toast('Potvrzovací e-mail byl odeslán na ' + newEmail);
-          setNewEmail(''); setEmailPass('');
+          toast('Potvrzovací e-mail byl odeslán na ' + newEmail + '. Nyní se přihlas znovu.');
+          p.onLogout();
         })
         .catch((err: unknown) => {
           const msg = err instanceof Error ? err.message : 'Změna e-mailu selhala.';
@@ -284,6 +284,7 @@ export default function SettingsScreen(p: Props) {
             <button className="btn accent" onClick={save}>Uložit změny</button>
             <div className="form-err">{profileErr}</div>
           </section>
+
 
           {/* Ostatní sekce */}
           <section className="card">

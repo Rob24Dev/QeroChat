@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { api } from '../api';
 import { toast } from '../utils';
 import type { User } from '../types';
@@ -55,6 +55,25 @@ export default function AuthScreen({ onAuthed }: { onAuthed: (u: User, t: string
   const [resetPass2, setResetPass2] = useState('');
   const [resetErr, setResetErr] = useState('');
   const [showReset, setShowReset] = useState(false);
+
+  // --- AUTOMATICKÉ POTVRZENÍ E-MAILU Z URL (?confirm-email=TOKEN) ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const confirmToken = params.get('confirm-email');
+
+    if (confirmToken) {
+      api.confirmEmail(confirmToken)
+          .then(() => {
+            toast('E-mail byl úspěšně ověřen ✔ Nyní se můžeš přihlásit.');
+            window.history.replaceState(null, '', window.location.pathname);
+          })
+          .catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'Ověření e-mailu selhalo.';
+            setLoginErr(msg);
+            window.history.replaceState(null, '', window.location.pathname);
+          });
+    }
+  }, []);
 
   const errText = (e: unknown, fallback: string) =>
       e instanceof Error ? e.message : fallback;
