@@ -43,7 +43,6 @@ public class ConversationsController {
                                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime before,
                                          @RequestAttribute("authenticatedUserId") UUID userId) {
         User user = userService.getUserById(userId);
-        System.out.println(chatService.getMessages(user, chatId, limit, before));
         return ResponseEntity.status(HttpStatus.OK).body(chatService.getMessages(user, chatId, limit, before));
     }
 

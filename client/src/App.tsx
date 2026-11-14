@@ -265,29 +265,14 @@ export default function App() {
     const oldestMsg = current[0];
     if (!oldestMsg || !oldestMsg.createdAt) return false;
 
-    // --- DEBUG: Podívej se, co posíláme na server ---
-    console.log('📤 [loadOlder] Odesílám požadavek:', {
-      chatId,
-      before: oldestMsg.createdAt,
-      currentMessagesCount: current.length
-    });
-
     const res = await api.getMessages(chatId, oldestMsg.createdAt, user.id);
-
-    // --- DEBUG: Podívej se, co vrátil backend ---
-    console.log('📥 [loadOlder] Odpověď ze serveru:', res);
-
     const older = res.messages ?? [];
     const hasMoreServer = res.hasMore ?? false;
-
-    console.log(`📊 [loadOlder] Nalezeno starších zpráv: ${older.length}, hasMore: ${hasMoreServer}`);
 
     if (older.length === 0) return false;
 
     const known = new Set(current.map(m => m.id));
     const fresh = older.filter(m => !known.has(m.id));
-
-    console.log(`✨ [loadOlder] Po filtraci duplicit zbývá nových zpráv k přidání: ${fresh.length}`);
 
     if (fresh.length === 0) return hasMoreServer;
 
