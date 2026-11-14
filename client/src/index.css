@@ -15,13 +15,16 @@
     --bubble-in: #e8e2e2; --bubble-out: #d63939; --bubble-out-text: #fff;
 }
 
-/* ---------- SCROLLBARS ---------- */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
+/* ---------- SCROLLBARS & RESET ---------- */
+*, *::before, *::after {
     box-sizing: border-box;
 }
-* { margin: 0; padding: 0; }
+* {
+    margin: 0;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+}
 html, body { height: 100%; }
 
 body {
@@ -381,7 +384,7 @@ label > input, label > select { margin-top: 5px; }
 }
 [data-theme="light"] .orbit-tip { background: #fffc; }
 
-/* ---------- AVATARS (Sjednocené a opravené rozměry) ---------- */
+/* ---------- AVATARS ---------- */
 .avatar {
     position: relative; border-radius: 50%; overflow: hidden;
     background: linear-gradient(135deg, #3a2b2b, #241a1a);
@@ -391,7 +394,6 @@ label > input, label > select { margin-top: 5px; }
 .avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .avatar .ini { font-weight: 700; color: var(--accent); }
 
-/* Velikostní modifikátory avatarů */
 .av-sm { width: 32px; height: 32px; }
 .av-sm .ini { font-size: 14px; }
 

@@ -288,8 +288,8 @@ export default function ChatScreen(p: Props) {
             <main className="messages" ref={boxRef} onScroll={onMessagesScroll}>
               {chat ? (
                   <>
-                    {canLoadMore && (
-                        <button className="load-more" onClick={() => void loadMore()}>↑ Načíst starší zprávy</button>
+                    {canLoadMore && (all.length % 20 === 0) && (
+                        <button className="load-more" onClick={() => void loadMore()}>↑ Načíst starší zprávy (20 předchozích)</button>
                     )}
                     {loadingOlder && <div className="day-sep"><span>Načítám starší…</span></div>}
                     {all.map((m, i) => {

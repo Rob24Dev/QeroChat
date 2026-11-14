@@ -223,9 +223,12 @@ export const api = {
     return (data ?? []).map(normalizeChat);
   },
 
-  async getMessages(id: string, before?: string, myUserId?: string): Promise<Message[]> {
+  async getMessages(id: string, before?: string | Date, myUserId?: string): Promise<Message[]> {
     let path = '/v1/conversations/' + id + '/messages?limit=20';
-    if (before) path += '&before=' + encodeURIComponent(before);
+    if (before) {
+      const isoBefore = before instanceof Date ? before.toISOString() : new Date(before).toISOString();
+      path += '&before=' + encodeURIComponent(isoBefore);
+    }
     const data = await authFetch(path);
     return (data ?? []).map((m: any) => ({
       id: m.id,

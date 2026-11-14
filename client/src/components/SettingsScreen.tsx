@@ -228,22 +228,42 @@ export default function SettingsScreen(p: Props) {
             <div className="profile-row">
               <Avatar user={p.user} cls="av-lg" />
               <div>
-                <label className="btn small" style={{ margin: 0, cursor: 'pointer' }}>
-                  Změnit profilovku
-                  <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleUpload(f, 'PROFILE_PICTURE');
-                  }} />
-                </label>
-                <label className="btn small" style={{ margin: '0 0 0 10px', cursor: 'pointer' }}>
-                  Změnit banner
-                  <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleUpload(f, 'BANNER');
-                  }} />
-                </label>
-                <div className="my-statustext">
+                {/* 1. Odznaky nahoře */}
+                {p.user.badges && p.user.badges.length > 0 && (
+                    <div className="pp-badges" style={{ marginBottom: '8px' }}>
+                      {p.user.badges.map((b, i) => (
+                          <span key={i} className="pp-badge-wrap" data-title={b.title}>
+                        {b.icon.startsWith('http') || b.icon.startsWith('data:') ? (
+                            <img className="pp-badge-img" src={b.icon} alt={b.title} />
+                        ) : (
+                            <span className="pp-badge">{b.icon}</span>
+                        )}
+                      </span>
+                      ))}
+                    </div>
+                )}
+
+                {/* 2. Status uprostřed */}
+                <div className="my-statustext" style={{ marginBottom: '8px' }}>
                   {STATUS_CS[status]}{statusText ? ' · ' + statusText : ''}
+                </div>
+
+                {/* 3. Tlačítka úplně dole */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <label className="btn small" style={{ margin: 0, cursor: 'pointer' }}>
+                    Změnit profilovku
+                    <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleUpload(f, 'PROFILE_PICTURE');
+                    }} />
+                  </label>
+                  <label className="btn small" style={{ margin: 0, cursor: 'pointer' }}>
+                    Změnit banner
+                    <input type="file" accept="image/*" hidden onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleUpload(f, 'BANNER');
+                    }} />
+                  </label>
                 </div>
               </div>
             </div>
